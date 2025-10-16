@@ -1,74 +1,42 @@
 import subprocess
 from typing import Union, List, Dict
+from rich import print
 
 
 def run_system_commands(
     commands: Union[str, List[str]],
     shell: bool = True,
-    capture_output: bool = True,
     text: bool = True,
     check: bool = False,
 ) -> Union[Dict, List[Dict]]:
 
     def execute_single_command(cmd: str) -> Dict:
-        try:
-            cmd_args = cmd if shell else cmd.split()
+        cmd_args = cmd if shell else cmd.split()
 
-            result = subprocess.run(
-                cmd_args,
-                shell=shell,
-                capture_output=capture_output,
-                text=text,
-                check=check,
-            )
+        print("[b]>>> {}[/]".format(cmd))
+        process = subprocess.Popen(
+            cmd_args if isinstance(cmd_args, str) else cmd_args,
+            shell=shell,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=text,
+            bufsize=1,
+        )
 
-            return {
-                "command": cmd,
-                "returncode": result.returncode,
-                "stdout": result.stdout if capture_output else None,
-                "stderr": result.stderr if capture_output else None,
-                "success": result.returncode == 0,
-            }
+        output = []
+        for line in process.stdout:
+            print(line, end="")
+            output.append(line)
 
-        except subprocess.CalledProcessError as e:
-            return {
-                "command": cmd,
-                "returncode": e.returncode,
-                "stdout": e.stdout if capture_output else None,
-                "stderr": e.stderr if capture_output else None,
-                "success": False,
-                "error": str(e),
-            }
-        except Exception as e:
-            return {
-                "command": cmd,
-                "returncode": -1,
-                "stdout": None,
-                "stderr": None,
-                "success": False,
-                "error": str(e),
-            }
+        process.wait()
+
+        # return {"returncode": process.returncode, "output": "".join(output)}
 
     if isinstance(commands, str):
-        return execute_single_command(commands)
-
+        # return execute_single_command(commands)
+        execute_single_command(commands)
     elif isinstance(commands, list):
-        results = []
-        for cmd in commands:
-            if isinstance(cmd, str):
-                results.append(execute_single_command(cmd))
-            else:
-                results.append(
-                    {
-                        "command": str(cmd),
-                        "returncode": -1,
-                        "stdout": None,
-                        "stderr": None,
-                        "success": False,
-                        "error": "Invalid command type",
-                    }
-                )
-        return results
-
+        # return [execute_single_command(cmd) for cmd in commands]
+        [execute_single_command(cmd) for cmd in commands]
     else:
         raise TypeError("commands must be a string or list of strings")
