@@ -1,0 +1,21 @@
+[project]
+name = "btweak"
+version = "0.1.0"
+description = "Berserk Arch Tweak Tool"
+authors = [
+    {name = "Gaurav Raj",email = "techw803@gmail.com"}
+]
+license = {text = "GPLv3"}
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "rich (>=14.2.0,<15.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+btweak = "btweak.main:main"
