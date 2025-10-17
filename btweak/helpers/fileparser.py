@@ -16,6 +16,21 @@ class ToolGroup:
     packages: List[Package] = field(default_factory=list)
 
 
+@dataclass
+class Container:
+    name: str
+    description: str
+    command: str
+    run: str
+
+
+@dataclass
+class ContainersGroup:
+    name: str
+    description: str
+    containers: List[Container] = field(default_factory=list)
+
+
 class ToolGroupParser:
     def __init__(self, yaml_file: str):
         self.yaml_file = yaml_file
@@ -25,9 +40,9 @@ class ToolGroupParser:
         with open(self.yaml_file, "r") as f:
             data = yaml.safe_load(f)
 
-        for group_data in data:
+        for i in data:
             packages = []
-            for pkg_data in group_data.get("packages", []):
+            for pkg_data in i.get("packages", []):
                 pkg = Package(
                     name=pkg_data["name"],
                     description=pkg_data["description"],
@@ -35,8 +50,8 @@ class ToolGroupParser:
                 packages.append(pkg)
 
             tool_group = ToolGroup(
-                name=group_data["name"],
-                description=group_data["description"],
+                name=i["name"],
+                description=i["description"],
                 packages=packages,
             )
             self.tool_groups.append(tool_group)
@@ -65,3 +80,56 @@ class ToolGroupParser:
 
     def get_all_packages(self) -> Dict[str, List[Package]]:
         return {group.name: group.packages for group in self.tool_groups}
+
+
+class ContainersGroupParser:
+    def __init__(self, yaml_file: str):
+        self.yaml_file = yaml_file
+        self.container_groups: List[ContainersGroup] = []
+
+    def parse(self) -> List[ContainersGroup]:
+        with open(self.yaml_file, "r") as f:
+            data = yaml.safe_load(f)
+
+        for i in data:
+            containers = []
+            for j in i.get("containers", []):
+                container = Container(
+                    name=j["name"],
+                    description=j["description"],
+                    command=j["command"],
+                    run=j["run"],
+                )
+                containers.append(container)
+
+            container_group = ContainersGroup(
+                name=i["name"],
+                description=i["description"],
+                containers=containers,
+            )
+            self.container_groups.append(container_group)
+
+        return self.container_groups
+
+    def get_containers_by_index(self, index: int) -> Optional[List[Container]]:
+        try:
+            return self.container_groups[index - 1].containers
+        except IndexError:
+            return None
+
+    def get_group_by_index(self, index: int) -> Optional[ContainersGroup]:
+        try:
+            return self.container_groups[index - 1]
+        except IndexError:
+            return None
+
+    def search_container(self, search_term: str) -> List[tuple]:
+        results = []
+        for group in self.container_groups:
+            for container in group.containers:
+                if search_term.lower() in container.name.lower():
+                    results.append((group.name, container))
+        return results
+
+    def get_all_containers(self) -> Dict[str, List[Container]]:
+        return {group.name: group.containers for group in self.container_groups}  # noqa

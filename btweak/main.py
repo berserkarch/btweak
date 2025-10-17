@@ -5,7 +5,12 @@ from btweak.helpers.toolhandler import (
     print_specific_group_by_index,
     install_group,
 )  # noqa
-from btweak.helpers.fileparser import ToolGroupParser
+from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser
+from btweak.helpers.dockerhandler import (
+    print_all_container_groups,
+    print_container_group_by_index,
+    print_search_results,
+)
 
 
 def parse_args():
@@ -51,6 +56,12 @@ def parse_args():
         action="store_true",
         help="List all available options",
     )
+    docker_subcmd.add_argument(
+        "-g", "--group", type=int, help="List info about a specific group"
+    )
+    docker_subcmd.add_argument(
+        "-s", "--search", type=str, help="Search for available containers"
+    )
 
     # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info") # noqa
     return parser, parser.parse_args()
@@ -58,6 +69,7 @@ def parse_args():
 
 def main():
     FILENAME = "/home/musashi/projects/btweak/btweak/data/tools.yaml"
+    DFILENAME = "/home/musashi/projects/btweak/btweak/data/docker.yaml"
     parser, args = parse_args()
 
     match args.command:
@@ -81,8 +93,14 @@ def main():
                 parser.parse_args(["tools", "--help"])
 
         case "docker":
+            dockerp = ContainersGroupParser(DFILENAME)
+            dockerp.parse()
             if args.list:
-                print("listing docker images...")
+                print_all_container_groups(dockerp)
+            elif args.group:
+                print_container_group_by_index(dockerp, args.group)
+            elif args.search:
+                print_search_results(dockerp, args.search)
             else:
                 parser.parse_args(["docker", "--help"])
         case _:
