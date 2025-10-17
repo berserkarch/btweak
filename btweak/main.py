@@ -1,6 +1,9 @@
 import argparse
 from btweak.helpers.fixthings import fix_berserkarch_gpg_pacman, fix_db_lck
-from btweak.helpers.toolhandler import print_groups, print_specific_group_by_index
+from btweak.helpers.toolhandler import (
+    print_groups,
+    print_specific_group_by_index,
+)  # noqa
 from btweak.helpers.fileparser import ToolGroupParser
 
 
@@ -34,7 +37,7 @@ def parse_args():
         "-g", "--group", type=int, help="List info about a specific group"
     )
 
-    # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info")
+    # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info") # noqa
     return parser, parser.parse_args()
 
 
