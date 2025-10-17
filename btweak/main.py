@@ -41,6 +41,17 @@ def parse_args():
         "-i", "--install", type=int, help="Install a specific group"
     )
 
+    # docker containers for systems and tools
+    docker_subcmd = subcmd.add_parser(
+        "docker", help="List and manage docker images for systems and tools"
+    )
+    docker_subcmd.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="List all available options",
+    )
+
     # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info") # noqa
     return parser, parser.parse_args()
 
@@ -69,6 +80,11 @@ def main():
             else:
                 parser.parse_args(["tools", "--help"])
 
+        case "docker":
+            if args.list:
+                print("listing docker images...")
+            else:
+                parser.parse_args(["docker", "--help"])
         case _:
             parser.print_help()
 
