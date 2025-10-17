@@ -1,5 +1,7 @@
 from rich.console import Console
 from rich.tree import Tree
+from btweak.helpers.cmdhandler import run_system_commands
+from btweak.helpers.fixthings import fix_db_lck
 
 console = Console()
 
@@ -30,6 +32,18 @@ def print_specific_group_by_index(index: int, parser):
 
     console.print(tree)
     print()
+
+
+def install_group(index: int, parser):
+    pkgs = " ".join(i.name for i in parser.get_packages_by_index(index))
+    fix_db_lck()
+
+    run_system_commands(
+        [
+            "sudo pacman -Syy --noconfirm yay",
+            "yay -Syy --noconfirm {}".format(pkgs),
+        ]  # noqa
+    )
 
 
 # if __name__ == "__main__":

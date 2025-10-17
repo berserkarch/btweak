@@ -3,6 +3,7 @@ from btweak.helpers.fixthings import fix_berserkarch_gpg_pacman, fix_db_lck
 from btweak.helpers.toolhandler import (
     print_groups,
     print_specific_group_by_index,
+    install_group,
 )  # noqa
 from btweak.helpers.fileparser import ToolGroupParser
 
@@ -36,6 +37,9 @@ def parse_args():
     tools_subcmd.add_argument(
         "-g", "--group", type=int, help="List info about a specific group"
     )
+    tools_subcmd.add_argument(
+        "-i", "--install", type=int, help="Install a specific group"
+    )
 
     # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info") # noqa
     return parser, parser.parse_args()
@@ -60,6 +64,8 @@ def main():
                 print_groups(groups)
             elif args.group:
                 print_specific_group_by_index(args.group, toolsp)
+            elif args.install:
+                install_group(args.install, toolsp)
             else:
                 parser.parse_args(["tools", "--help"])
 
