@@ -1,5 +1,7 @@
 import argparse
 from btweak.helpers.fixthings import fix_berserkarch_gpg_pacman, fix_db_lck
+from btweak.helpers.toolhandler import print_groups, print_specific_group_by_index
+from btweak.helpers.fileparser import ToolGroupParser
 
 
 def parse_args():
@@ -20,11 +22,24 @@ def parse_args():
         help="Fix pacman -- unable to lock database error",
     )
 
+    # tools group
+    tools_subcmd = subcmd.add_parser("tools", help="List, install and remove tools")
+    tools_subcmd.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="List all tools categories and profiles",
+    )
+    tools_subcmd.add_argument(
+        "-g", "--group", type=int, help="List info about a specific group"
+    )
+
     # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info")
     return parser, parser.parse_args()
 
 
 def main():
+    FILENAME = "/home/musashi/projects/btweak/btweak/data/tools.yaml"
     parser, args = parse_args()
 
     match args.command:
@@ -35,6 +50,16 @@ def main():
                 fix_db_lck()
             else:
                 parser.parse_args(["fix", "--help"])
+        case "tools":
+            toolsp = ToolGroupParser(FILENAME)
+            groups = toolsp.parse()
+            if args.list:
+                print_groups(groups)
+            elif args.group:
+                print_specific_group_by_index(args.group, toolsp)
+            else:
+                parser.parse_args(["tools", "--help"])
+
         case _:
             parser.print_help()
 

@@ -1,0 +1,55 @@
+from rich.console import Console
+from rich.tree import Tree
+
+console = Console()
+
+
+def print_groups(tool_groups):
+
+    tree = Tree("[=== [b u blue]All Tool Groups[/] ===]")
+    for ind, i in enumerate(tool_groups, start=1):
+        group = tree.add(f"{ind}. [b cyan]{i.name}[/]")
+        group.add(f"[dim]{i.description}[/]")
+        group.add(f"[yellow]{len(i.packages)} packages[/]")
+    console.print(tree)
+    print()
+
+
+def print_specific_group_by_index(index: int, parser):
+    group = parser.get_group_by_index(index)
+    if group is None:
+        console.print(f"[red]Error: Invalid index {index}[/]")
+        return
+
+    tree = Tree(f"[b u cyan]{group.name}[/]")
+    tree.add(f"[dim]{group.description}[/]")
+
+    packages_branch = tree.add(f"[yellow]{len(group.packages)} packages[/]")
+    for i in group.packages:
+        packages_branch.add(f"[green]{i.name}[/]").add(f"[dim]{i.description}[/]")
+
+    console.print(tree)
+    print()
+
+
+# if __name__ == "__main__":
+#     parser = ToolGroupParser(argv[1])
+#     tool_groups = parser.parse()
+
+#     print_groups()
+
+#     print_specific_group_by_index(4)
+
+#     packages = parser.get_packages_by_index(2)
+
+#     pkgs = " ".join(i.name for i in packages)
+#     print(pkgs)
+#     if packages:
+#         for pkg in packages:
+#             print(f"  - {pkg.name}")
+
+#     print("\n\n=== Search Results for 'metasploit' ===")
+#     results = parser.search_package("metasploit")
+#     for group_name, pkg in results:
+#         print(f"Group: {group_name}")
+#         print(f"  {pkg.name}: {pkg.description}")
