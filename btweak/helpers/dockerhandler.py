@@ -75,3 +75,34 @@ def print_search_results(parser, search_term: str):
     console.print()
     console.print(tree)
     console.print()
+
+
+def run_container(parser, search_term: str):
+    console = Console()
+
+    results = parser.search_container(search_term)
+
+    if not results:
+        tree = Tree(f"[bold yellow]Search: '{search_term}'[/]")
+        tree.add("[dim]No results found[/]")
+        console.print(tree)
+        return
+    elif len(results) == 1:
+        print(results[0][1].run)
+        return
+    else:
+        tree = Tree(f"[bold cyan]Multiple Results for '{search_term}'[/]")
+        tree.add(f"[yellow]Found {len(results)} container(s)[/]")
+
+        for group_name, container in results:
+            result_branch = tree.add(f"[green]{container.name}[/]")
+            result_branch.add(f"[dim]Group: {group_name}[/]")
+            result_branch.add(f"[white]{container.description}[/]")
+
+            commands_branch = result_branch.add("[bold cyan]Commands:[/]")
+            commands_branch.add(f"[blue]Pull:[/] {container.command}")
+            commands_branch.add(f"[yellow]Run:[/] {container.run}")
+
+    console.print()
+    console.print(tree)
+    console.print()

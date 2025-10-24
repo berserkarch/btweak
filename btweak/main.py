@@ -10,6 +10,7 @@ from btweak.helpers.dockerhandler import (
     print_all_container_groups,
     print_container_group_by_index,
     print_search_results,
+    run_container,
 )
 
 
@@ -62,6 +63,9 @@ def parse_args():
     docker_subcmd.add_argument(
         "-s", "--search", type=str, help="Search for available containers"
     )
+    docker_subcmd.add_argument(
+        "-r", "--run", type=str, help="Run any available containers"
+    )
 
     # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info") # noqa
     return parser, parser.parse_args()
@@ -101,6 +105,8 @@ def main():
                 print_container_group_by_index(dockerp, args.group)
             elif args.search:
                 print_search_results(dockerp, args.search)
+            elif args.run:
+                run_container(dockerp, args.run)
             else:
                 parser.parse_args(["docker", "--help"])
         case _:
