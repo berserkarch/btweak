@@ -1,5 +1,6 @@
 from rich.console import Console
 from rich.tree import Tree
+from btweak.helpers.cmdhandler import run_system_commands
 
 console = Console()
 
@@ -89,6 +90,11 @@ def run_container(parser, search_term: str):
         return
     elif len(results) == 1:
         print(results[0][1].run)
+        run_system_commands(
+            [
+                "kitty --hold tmux new-session {}".format(results[0][1].run),
+            ]
+        )
         return
     else:
         tree = Tree(f"[bold cyan]Multiple Results for '{search_term}'[/]")
