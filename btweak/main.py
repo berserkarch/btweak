@@ -72,8 +72,8 @@ def parse_args():
 
 
 def main():
-    FILENAME = "/home/musashi/projects/btweak/btweak/data/tools.yaml"
-    DFILENAME = "/home/musashi/projects/btweak/btweak/data/docker.yaml"
+    FILENAME = "/usr/share/berserkarch/data/tools.yaml"
+    DFILENAME = "/usr/share/berserkarch/data/docker.yaml"
     parser, args = parse_args()
 
     match args.command:
