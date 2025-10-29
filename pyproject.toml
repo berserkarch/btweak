@@ -1,6 +1,6 @@
 [project]
 name = "btweak"
-version = "0.1.0"
+version = "0.1.1"
 description = "Berserk Arch Tweak Tool"
 authors = [
     {name = "Gaurav Raj",email = "techw803@gmail.com"}
