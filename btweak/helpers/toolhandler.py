@@ -7,7 +7,6 @@ console = Console()
 
 
 def print_groups(tool_groups):
-
     tree = Tree("[=== [b u blue]All Tool Groups[/] ===]")
     for ind, i in enumerate(tool_groups, start=1):
         group = tree.add(f"{ind}. [b cyan]{i.name}[/]")
@@ -44,26 +43,3 @@ def install_group(index: int, parser):
             "yay -Syy --noconfirm {}".format(pkgs),
         ]  # noqa
     )
-
-
-# if __name__ == "__main__":
-#     parser = ToolGroupParser(argv[1])
-#     tool_groups = parser.parse()
-
-#     print_groups()
-
-#     print_specific_group_by_index(4)
-
-#     packages = parser.get_packages_by_index(2)
-
-#     pkgs = " ".join(i.name for i in packages)
-#     print(pkgs)
-#     if packages:
-#         for pkg in packages:
-#             print(f"  - {pkg.name}")
-
-#     print("\n\n=== Search Results for 'metasploit' ===")
-#     results = parser.search_package("metasploit")
-#     for group_name, pkg in results:
-#         print(f"Group: {group_name}")
-#         print(f"  {pkg.name}: {pkg.description}")
