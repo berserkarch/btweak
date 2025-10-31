@@ -1,9 +1,9 @@
 [project]
 name = "btweak"
-version = "0.1.1"
+version = "0.1.2"
 description = "Berserk Arch Tweak Tool"
 authors = [
-    {name = "Gaurav Raj",email = "techw803@gmail.com"}
+    {name = "Gaurav Raj",email = "gauravraj0408@gmail.com"}
 ]
 license = {text = "GPLv3"}
 readme = "README.md"
