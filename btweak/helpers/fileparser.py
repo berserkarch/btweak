@@ -25,10 +25,18 @@ class Container:
 
 
 @dataclass
+class Category:
+    name: str
+    description: str
+    containers: List[Container] = field(default_factory=list)
+
+
+@dataclass
 class ContainersGroup:
     name: str
     description: str
     containers: List[Container] = field(default_factory=list)
+    categories: List[Category] = field(default_factory=list)
 
 
 class ToolGroupParser:
@@ -92,28 +100,53 @@ class ContainersGroupParser:
             data = yaml.safe_load(f)
 
         for i in data:
-            containers = []
-            for j in i.get("containers", []):
-                container = Container(
-                    name=j["name"],
-                    description=j["description"],
-                    command=j["command"],
-                    run=j["run"],
-                )
-                containers.append(container)
-
             container_group = ContainersGroup(
                 name=i["name"],
                 description=i["description"],
-                containers=containers,
             )
+
+            if "categories" in i:
+                for cat_data in i["categories"]:
+                    containers = []
+                    for container_data in cat_data.get("containers", []):
+                        container = Container(
+                            name=container_data["name"],
+                            description=container_data["description"],
+                            command=container_data["command"],
+                            run=container_data["run"],
+                        )
+                        containers.append(container)
+
+                    category = Category(
+                        name=cat_data["name"],
+                        description=cat_data["description"],
+                        containers=containers,
+                    )
+                    container_group.categories.append(category)
+
+            elif "containers" in i:
+                for container_data in i["containers"]:
+                    container = Container(
+                        name=container_data["name"],
+                        description=container_data["description"],
+                        command=container_data["command"],
+                        run=container_data["run"],
+                    )
+                    container_group.containers.append(container)
+
             self.container_groups.append(container_group)
 
         return self.container_groups
 
     def get_containers_by_index(self, index: int) -> Optional[List[Container]]:
         try:
-            return self.container_groups[index - 1].containers
+            group = self.container_groups[index - 1]
+            if group.categories:
+                all_containers = []
+                for category in group.categories:
+                    all_containers.extend(category.containers)
+                return all_containers
+            return group.containers
         except IndexError:
             return None
 
@@ -129,7 +162,20 @@ class ContainersGroupParser:
             for container in group.containers:
                 if search_term.lower() in container.name.lower():
                     results.append((group.name, container))
+
+            for category in group.categories:
+                for container in category.containers:
+                    if search_term.lower() in container.name.lower():
+                        results.append((group.name, category.name, container))
+
         return results
 
     def get_all_containers(self) -> Dict[str, List[Container]]:
-        return {group.name: group.containers for group in self.container_groups}  # noqa
+        result = {}
+        for group in self.container_groups:
+            all_containers = []
+            all_containers.extend(group.containers)
+            for category in group.categories:
+                all_containers.extend(category.containers)
+            result[group.name] = all_containers
+        return result
