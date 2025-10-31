@@ -13,15 +13,17 @@ def print_all_container_groups(parser):
         group_branch.add(f"[dim italic]{group.description}[/]")
 
         if hasattr(group, "categories") and group.categories:
-            total_containers = sum(len(cat.containers) for cat in group.categories)
+            total_containers = sum(
+                len(cat.containers) for cat in group.categories
+            )  # noqa
             group_branch.add(
-                f"[yellow]{len(group.categories)} categories, {total_containers} total containers[/]"
+                f"[yellow]{len(group.categories)} categories, {total_containers} total containers[/]"  # noqa
             )
 
-            categories_branch = group_branch.add("[bold magenta]Categories:[/]")
+            categories_branch = group_branch.add("[bold magenta]Categories:[/]")  # noqa
             for cat_idx, category in enumerate(group.categories, start=1):
                 cat_branch = categories_branch.add(
-                    f"[magenta]{cat_idx}. {category.name}[/] [dim]({len(category.containers)} containers)[/]"
+                    f"[magenta]{cat_idx}. {category.name}[/] [dim]({len(category.containers)} containers)[/]"  # noqa
                 )
                 cat_branch.add(f"[dim italic]{category.description}[/]")
 
@@ -57,7 +59,7 @@ def print_container_group_by_index(parser, index: int):
     if hasattr(group, "categories") and group.categories:
         total_containers = sum(len(cat.containers) for cat in group.categories)
         main_tree.add(
-            f"[yellow]Total: {len(group.categories)} categories, {total_containers} containers[/]"
+            f"[yellow]Total: {len(group.categories)} categories, {total_containers} containers[/]"  # noqa
         )
 
         for cat_idx, category in enumerate(group.categories, start=1):
@@ -72,7 +74,9 @@ def print_container_group_by_index(parser, index: int):
                 )
                 container_branch.add(f"[white]{container.description}[/]")
 
-                commands_branch = container_branch.add("[bold cyan]Commands:[/]")
+                commands_branch = container_branch.add(
+                    "[bold cyan]Commands:[/]"
+                )  # noqa
                 commands_branch.add(f"[blue]Pull:[/] {container.command}")
                 commands_branch.add(f"[yellow]Run:[/] {container.run}")
 
@@ -80,12 +84,68 @@ def print_container_group_by_index(parser, index: int):
         main_tree.add(f"[yellow]Total: {len(group.containers)} containers[/]")
 
         for idx, container in enumerate(group.containers, start=1):
-            container_branch = main_tree.add(f"[bold green]{idx}. {container.name}[/]")
+            container_branch = main_tree.add(
+                f"[bold green]{idx}. {container.name}[/]"
+            )  # noqa
             container_branch.add(f"[white]{container.description}[/]")
 
             commands_branch = container_branch.add("[bold cyan]Commands:[/]")
             commands_branch.add(f"[blue]Pull:[/] {container.command}")
             commands_branch.add(f"[yellow]Run:[/] {container.run}")
+
+    console.print()
+    console.print(main_tree)
+    console.print()
+
+
+def print_category_by_index(parser, group_index: int, category_index: int):
+    group = parser.get_group_by_index(group_index)
+
+    if group is None:
+        error_tree = Tree("[bold red]✗ Error[/]")
+        error_tree.add(f"Container group with index '{group_index}' not found.")  # noqa
+        error_tree.add(
+            f"Available indices: 1 to {len(parser.container_groups)}"
+        )  # noqa
+        console.print(error_tree)
+        return
+
+    if not (hasattr(group, "categories") and group.categories):
+        error_tree = Tree("[bold red]✗ Error[/]")
+        error_tree.add(
+            f"The selected group '{group.name}' does not contain any categories."  # noqa
+        )
+        console.print(error_tree)
+        return
+
+    try:
+        category = group.categories[category_index - 1]
+    except IndexError:
+        error_tree = Tree("[bold red]✗ Error[/]")
+        error_tree.add(
+            f"Category with index '{category_index}' not found in group '{group.name}'."  # noqa
+        )
+        error_tree.add(
+            f"Available indices for this group: 1 to {len(group.categories)}"
+        )
+        console.print(error_tree)
+        return
+
+    main_tree = Tree(
+        f"[bold magenta]Category: {category.name}[/] [dim]from Group:[/] [bold blue]{group.name}[/]"  # noqa
+    )
+    main_tree.add(f"[dim italic]{category.description}[/]")
+    main_tree.add(f"[yellow]Listing {len(category.containers)} container(s)[/]")  # noqa
+
+    for idx, container in enumerate(category.containers, start=1):
+        container_branch = main_tree.add(
+            f"[bold green]{idx}. {container.name}[/]"
+        )  # noqa
+        container_branch.add(f"[white]{container.description}[/]")
+
+        commands_branch = container_branch.add("[bold cyan]Commands:[/]")
+        commands_branch.add(f"[blue]Pull:[/] {container.command}")
+        commands_branch.add(f"[yellow]Run:[/] {container.run}")
 
     console.print()
     console.print(main_tree)

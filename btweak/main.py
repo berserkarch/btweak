@@ -9,6 +9,7 @@ from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser
 from btweak.helpers.dockerhandler import (
     print_all_container_groups,
     print_container_group_by_index,
+    print_category_by_index,
     print_search_results,
     run_container,
 )
@@ -61,6 +62,12 @@ def parse_args():
         "-g", "--group", type=int, help="List info about a specific group"
     )
     docker_subcmd.add_argument(
+        "-c",
+        "--category",
+        type=int,
+        help="List containers in a specific category. Must be used with the --group (-g) flag.",  # noqa
+    )
+    docker_subcmd.add_argument(
         "-s", "--search", type=str, help="Search for available containers"
     )
     docker_subcmd.add_argument(
@@ -101,10 +108,17 @@ def main():
         case "docker":
             dockerp = ContainersGroupParser(DFILENAME)
             dockerp.parse()
-            if args.list:
-                print_all_container_groups(dockerp)
+            if args.group and args.category:
+                print_category_by_index(dockerp, args.group, args.category)
             elif args.group:
                 print_container_group_by_index(dockerp, args.group)
+            elif args.category:
+                print(
+                    "Error: The --category (-c) flag must be used with the --group (-g) flag."  # noqa
+                )
+                parser.parse_args(["docker", "--help"])
+            elif args.list:
+                print_all_container_groups(dockerp)
             elif args.search:
                 print_search_results(dockerp, args.search)
             elif args.run:
