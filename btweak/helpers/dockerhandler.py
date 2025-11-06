@@ -1,6 +1,10 @@
 from rich.console import Console
 from rich.tree import Tree
-from btweak.helpers.cmdhandler import run_system_commands, get_cmd_data
+from btweak.helpers.cmdhandler import (
+    run_system_commands,
+    get_cmd_data,
+    remove_dir,
+)  # noqa
 from rich import print
 
 
@@ -152,6 +156,7 @@ class ContainerDisplay:
             "No Images were found...",
         )
         run_system_commands("docker system prune -f")
+        remove_dir("~/.config/btweak/docker")
         print("\n([b green]*[/]) Done...")
 
     def _get_group_or_error(self, index: int):

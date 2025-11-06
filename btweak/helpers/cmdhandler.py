@@ -1,6 +1,7 @@
 import subprocess
 from typing import Union, List, Dict
 from rich import print
+from pathlib import Path
 
 
 def run_system_commands(
@@ -43,3 +44,13 @@ def get_cmd_data(cmds: List[str]) -> List:
     output = result.stdout.strip().splitlines()
 
     return output
+
+
+def remove_dir(path: str) -> bool:
+    p = Path(path).expanduser()
+    if p.exists():
+        run_system_commands(f"sudo rm -rf {path}")
+    else:
+        print(f"[info] Directory does not exists: {p}")
+        return False
+    return True
