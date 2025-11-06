@@ -1,7 +1,6 @@
 import yaml
 from typing import List, Dict, Optional
 from dataclasses import dataclass, field
-from importlib import resources
 
 
 @dataclass
@@ -38,12 +37,6 @@ class ContainersGroup:
     description: str
     containers: List[Container] = field(default_factory=list)
     categories: List[Category] = field(default_factory=list)
-
-class FileParser:
-    def __init__(self, yaml_file: str):
-        self.yaml_file = yaml_file
-        print(resources.files("btweak.data").joinpath(yaml_file))
-
 
 
 class ToolGroupParser:

@@ -1,11 +1,12 @@
 import argparse
+from importlib import resources
 from btweak.helpers.fixthings import fix_berserkarch_gpg_pacman, fix_db_lck
 from btweak.helpers.toolhandler import (
     print_groups,
     print_specific_group_by_index,
     install_group,
 )  # noqa
-from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser, FileParser
+from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser
 from btweak.helpers.dockerhandler import (
     print_all_container_groups,
     print_container_group_by_index,
@@ -79,11 +80,6 @@ def parse_args():
 
 
 def main():
-    FILENAME = "/usr/share/berserkarch/data/tools.yaml"
-    DFILENAME = "/usr/share/berserkarch/data/docker.yaml"
-    FileParser("tools.yaml")
-    # FILENAME = "/home/musashi/projects/btweak/btweak/data/tools.yaml"
-    # DFILENAME = "/home/musashi/projects/btweak/btweak/data/docker.yaml"
     parser, args = parse_args()
 
     match args.command:
@@ -95,7 +91,9 @@ def main():
             else:
                 parser.parse_args(["fix", "--help"])
         case "tools":
-            toolsp = ToolGroupParser(FILENAME)
+            toolsp = ToolGroupParser(
+                resources.files("btweak.data").joinpath("tools.yaml")
+            )
             groups = toolsp.parse()
             if args.list:
                 print_groups(groups)
@@ -107,7 +105,9 @@ def main():
                 parser.parse_args(["tools", "--help"])
 
         case "docker":
-            dockerp = ContainersGroupParser(DFILENAME)
+            dockerp = ContainersGroupParser(
+                resources.files("btweak.data").joinpath("docker.yaml")
+            )
             dockerp.parse()
             if args.group and args.category:
                 print_category_by_index(dockerp, args.group, args.category)
