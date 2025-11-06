@@ -38,6 +38,7 @@
           run: "docker run -d --rm --name=kali-linux -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/kali-linux:/config --shm-size='1gb' lscr.io/linuxserver/kali-linux:latest"
           runtime_comments:
             - "- To stop the container run: docker stop kali-linux"
+            - "- Access at: https://localhost:3001/"
             - "- Access via shell: docker exec -it kali-linux /bin/bash"
             - "- More Info: https://github.com/linuxserver/docker-kali-linux"
     - name: "Parrot OS"
