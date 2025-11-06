@@ -2,234 +2,198 @@ from rich.console import Console
 from rich.tree import Tree
 from btweak.helpers.cmdhandler import run_system_commands
 
-console = Console()
 
+class ContainerDisplay:
+    def __init__(self, parser, console=None):
+        self.parser = parser
+        self.console = console or Console()
 
-def print_all_container_groups(parser):
-    main_tree = Tree("[bold blue]═══ Container Groups ═══[/]")
+    def show_all_groups(self):
+        main_tree = Tree("[bold blue]═══ Container Groups ═══[/]")
 
-    for idx, group in enumerate(parser.container_groups, start=1):
-        group_branch = main_tree.add(f"[bold cyan]{idx}. {group.name}[/]")
-        group_branch.add(f"[dim italic]{group.description}[/]")
+        for idx, group in enumerate(self.parser.container_groups, start=1):
+            group_branch = main_tree.add(f"[bold cyan]{idx}. {group.name}[/]")
+            group_branch.add(f"[dim italic]{group.description}[/]")
+
+            if hasattr(group, "categories") and group.categories:
+                total_containers = sum(len(cat.containers) for cat in group.categories)
+                group_branch.add(
+                    f"[yellow]{len(group.categories)} categories, {total_containers} total containers[/]"
+                )
+
+                categories_branch = group_branch.add("[bold magenta]Categories:[/]")
+                for cat_idx, category in enumerate(group.categories, start=1):
+                    cat_branch = categories_branch.add(
+                        f"[magenta]{cat_idx}. {category.name}[/] [dim]({len(category.containers)} containers)[/]"
+                    )
+                    cat_branch.add(f"[dim italic]{category.description}[/]")
+
+            elif hasattr(group, "containers") and group.containers:
+                containers_branch = group_branch.add(
+                    f"[yellow]{len(group.containers)} containers available[/]"
+                )
+                for container in group.containers:
+                    containers_branch.add(f"[green]▸ {container.name}[/]")
+
+        self._print_tree(main_tree)
+
+    def show_group(self, index: int):
+        group = self._get_group_or_error(index)
+        if group is None:
+            return
+
+        main_tree = Tree(f"[bold blue]{group.name}[/]")
+        main_tree.add(f"[dim italic]{group.description}[/]")
 
         if hasattr(group, "categories") and group.categories:
-            total_containers = sum(
-                len(cat.containers) for cat in group.categories
-            )  # noqa
-            group_branch.add(
-                f"[yellow]{len(group.categories)} categories, {total_containers} total containers[/]"  # noqa
-            )
-
-            categories_branch = group_branch.add("[bold magenta]Categories:[/]")  # noqa
-            for cat_idx, category in enumerate(group.categories, start=1):
-                cat_branch = categories_branch.add(
-                    f"[magenta]{cat_idx}. {category.name}[/] [dim]({len(category.containers)} containers)[/]"  # noqa
-                )
-                cat_branch.add(f"[dim italic]{category.description}[/]")
-
-                # containers_list = cat_branch.add("[green]Containers:[/]")
-                # for container in category.containers:
-                #     containers_list.add(f"[green]• {container.name}[/]")
-
+            self._add_categorized_containers(main_tree, group)
         elif hasattr(group, "containers") and group.containers:
-            containers_branch = group_branch.add(
-                f"[yellow]{len(group.containers)} containers available[/]"
+            self._add_flat_containers(main_tree, group)
+
+        self._print_tree(main_tree)
+
+    def show_category(self, group_index: int, category_index: int):
+        group = self._get_group_or_error(group_index)
+        if group is None:
+            return
+
+        if not (hasattr(group, "categories") and group.categories):
+            self._show_error(
+                f"The selected group '{group.name}' does not contain any categories."
             )
-            for container in group.containers:
-                containers_branch.add(f"[green]▸ {container.name}[/]")
+            return
 
-    console.print()
-    console.print(main_tree)
-    console.print()
+        category = self._get_category_or_error(group, category_index)
+        if category is None:
+            return
 
+        main_tree = Tree(
+            f"[bold magenta]Category: {category.name}[/] [dim]from Group:[/] [bold blue]{group.name}[/]"
+        )
+        main_tree.add(f"[dim italic]{category.description}[/]")
+        main_tree.add(f"[yellow]Listing {len(category.containers)} container(s)[/]")
 
-def print_container_group_by_index(parser, index: int):
-    group = parser.get_group_by_index(index)
+        for idx, container in enumerate(category.containers, start=1):
+            self._add_container_details(main_tree, container, f"{idx}. ")
 
-    if group is None:
-        error_tree = Tree("[bold red]✗ Error[/]")
-        error_tree.add(f"Invalid index: {index}")
-        error_tree.add(f"Available indices: 1-{len(parser.container_groups)}")
-        console.print(error_tree)
-        return
+        self._print_tree(main_tree)
 
-    main_tree = Tree(f"[bold blue]{group.name}[/]")
-    main_tree.add(f"[dim italic]{group.description}[/]")
+    def search(self, search_term: str):
+        results = self.parser.search_container(search_term)
 
-    if hasattr(group, "categories") and group.categories:
+        if not results:
+            tree = Tree(f"[bold yellow]Search: '{search_term}'[/]")
+            tree.add("[dim]No results found[/]")
+            self._print_tree(tree)
+            return
+
+        tree = Tree(f"[bold cyan]Search Results for '{search_term}'[/]")
+        tree.add(f"[yellow]Found {len(results)} container(s)[/]")
+
+        for result in results:
+            container = result[-1]
+            location = self._format_result_location(result)
+
+            result_branch = tree.add(f"[green]{container.name}[/]")
+            result_branch.add(location)
+            self._add_container_details(result_branch, container, prefix="")
+
+        self._print_tree(tree)
+
+    def run(self, search_term: str):
+        results = self.parser.search_container(search_term)
+
+        if not results:
+            tree = Tree(f"[bold yellow]Search: '{search_term}'[/]")
+            tree.add("[dim]No results found[/]")
+            self._print_tree(tree)
+            return
+
+        if len(results) == 1:
+            container = results[0][-1]
+            self._execute_container(container)
+            return
+
+        tree = Tree(f"[bold cyan]Multiple Results for '{search_term}'[/]")
+        tree.add(f"[yellow]Found {len(results)} container(s)[/]")
+
+        for result in results:
+            container = result[-1]
+            location = self._format_result_location(result)
+
+            result_branch = tree.add(f"[green]{container.name}[/]")
+            result_branch.add(location)
+            self._add_container_details(result_branch, container, prefix="")
+
+        self._print_tree(tree)
+
+    def _get_group_or_error(self, index: int):
+        group = self.parser.get_group_by_index(index)
+        if group is None:
+            self._show_error(
+                f"Invalid index: {index}",
+                f"Available indices: 1-{len(self.parser.container_groups)}",
+            )
+        return group
+
+    def _get_category_or_error(self, group, category_index: int):
+        try:
+            return group.categories[category_index - 1]
+        except IndexError:
+            self._show_error(
+                f"Category with index '{category_index}' not found in group '{group.name}'.",
+                f"Available indices for this group: 1 to {len(group.categories)}",
+            )
+            return None
+
+    def _add_categorized_containers(self, tree, group):
         total_containers = sum(len(cat.containers) for cat in group.categories)
-        main_tree.add(
-            f"[yellow]Total: {len(group.categories)} categories, {total_containers} containers[/]"  # noqa
+        tree.add(
+            f"[yellow]Total: {len(group.categories)} categories, {total_containers} containers[/]"
         )
 
         for cat_idx, category in enumerate(group.categories, start=1):
-            category_branch = main_tree.add(
-                f"[bold magenta]{cat_idx}. {category.name}[/]"
-            )
+            category_branch = tree.add(f"[bold magenta]{cat_idx}. {category.name}[/]")
             category_branch.add(f"[dim italic]{category.description}[/]")
 
             for idx, container in enumerate(category.containers, start=1):
-                container_branch = category_branch.add(
-                    f"[bold green]{cat_idx}.{idx}. {container.name}[/]"
+                self._add_container_details(
+                    category_branch, container, f"{cat_idx}.{idx}. "
                 )
-                container_branch.add(f"[white]{container.description}[/]")
 
-                commands_branch = container_branch.add(
-                    "[bold cyan]Commands:[/]"
-                )  # noqa
-                commands_branch.add(f"[blue]Pull:[/] {container.command}")
-                commands_branch.add(f"[yellow]Run:[/] {container.run}")
-
-    elif hasattr(group, "containers") and group.containers:
-        main_tree.add(f"[yellow]Total: {len(group.containers)} containers[/]")
+    def _add_flat_containers(self, tree, group):
+        tree.add(f"[yellow]Total: {len(group.containers)} containers[/]")
 
         for idx, container in enumerate(group.containers, start=1):
-            container_branch = main_tree.add(
-                f"[bold green]{idx}. {container.name}[/]"
-            )  # noqa
-            container_branch.add(f"[white]{container.description}[/]")
+            self._add_container_details(tree, container, f"{idx}. ")
 
-            commands_branch = container_branch.add("[bold cyan]Commands:[/]")
-            commands_branch.add(f"[blue]Pull:[/] {container.command}")
-            commands_branch.add(f"[yellow]Run:[/] {container.run}")
-
-    console.print()
-    console.print(main_tree)
-    console.print()
-
-
-def print_category_by_index(parser, group_index: int, category_index: int):
-    group = parser.get_group_by_index(group_index)
-
-    if group is None:
-        error_tree = Tree("[bold red]✗ Error[/]")
-        error_tree.add(f"Container group with index '{group_index}' not found.")  # noqa
-        error_tree.add(
-            f"Available indices: 1 to {len(parser.container_groups)}"
-        )  # noqa
-        console.print(error_tree)
-        return
-
-    if not (hasattr(group, "categories") and group.categories):
-        error_tree = Tree("[bold red]✗ Error[/]")
-        error_tree.add(
-            f"The selected group '{group.name}' does not contain any categories."  # noqa
-        )
-        console.print(error_tree)
-        return
-
-    try:
-        category = group.categories[category_index - 1]
-    except IndexError:
-        error_tree = Tree("[bold red]✗ Error[/]")
-        error_tree.add(
-            f"Category with index '{category_index}' not found in group '{group.name}'."  # noqa
-        )
-        error_tree.add(
-            f"Available indices for this group: 1 to {len(group.categories)}"
-        )
-        console.print(error_tree)
-        return
-
-    main_tree = Tree(
-        f"[bold magenta]Category: {category.name}[/] [dim]from Group:[/] [bold blue]{group.name}[/]"  # noqa
-    )
-    main_tree.add(f"[dim italic]{category.description}[/]")
-    main_tree.add(f"[yellow]Listing {len(category.containers)} container(s)[/]")  # noqa
-
-    for idx, container in enumerate(category.containers, start=1):
-        container_branch = main_tree.add(
-            f"[bold green]{idx}. {container.name}[/]"
-        )  # noqa
+    def _add_container_details(self, parent_branch, container, prefix=""):
+        container_branch = parent_branch.add(f"[bold green]{prefix}{container.name}[/]")
         container_branch.add(f"[white]{container.description}[/]")
 
         commands_branch = container_branch.add("[bold cyan]Commands:[/]")
         commands_branch.add(f"[blue]Pull:[/] {container.command}")
         commands_branch.add(f"[yellow]Run:[/] {container.run}")
 
-    console.print()
-    console.print(main_tree)
-    console.print()
-
-
-def print_search_results(parser, search_term: str):
-    console = Console()
-
-    results = parser.search_container(search_term)
-
-    if not results:
-        tree = Tree(f"[bold yellow]Search: '{search_term}'[/]")
-        tree.add("[dim]No results found[/]")
-        console.print(tree)
-        return
-
-    tree = Tree(f"[bold cyan]Search Results for '{search_term}'[/]")
-    tree.add(f"[yellow]Found {len(results)} container(s)[/]")
-
-    for result in results:
+    def _format_result_location(self, result):
         if len(result) == 3:
-            group_name, category_name, container = result
-            result_branch = tree.add(f"[green]{container.name}[/]")
-            result_branch.add(
-                f"[dim]Group: {group_name} → Category: {category_name}[/]"
-            )
+            group_name, category_name, _ = result
+            return f"[dim]Group: {group_name} → Category: {category_name}[/]"
         else:
-            group_name, container = result
-            result_branch = tree.add(f"[green]{container.name}[/]")
-            result_branch.add(f"[dim]Group: {group_name}[/]")
+            group_name, _ = result
+            return f"[dim]Group: {group_name}[/]"
 
-        result_branch.add(f"[white]{container.description}[/]")
-
-        commands_branch = result_branch.add("[bold cyan]Commands:[/]")
-        commands_branch.add(f"[blue]Pull:[/] {container.command}")
-        commands_branch.add(f"[yellow]Run:[/] {container.run}")
-
-    console.print()
-    console.print(tree)
-    console.print()
-
-
-def run_container(parser, search_term: str):
-    console = Console()
-
-    results = parser.search_container(search_term)
-
-    if not results:
-        tree = Tree(f"[bold yellow]Search: '{search_term}'[/]")
-        tree.add("[dim]No results found[/]")
-        console.print(tree)
-        return
-    elif len(results) == 1:
-        container = results[0][-1]
+    def _execute_container(self, container):
         print(container.run)
-        run_system_commands(
-            [
-                "kitty --hold tmux new-session {}".format(container.run),
-            ]
-        )
-        return
-    else:
-        tree = Tree(f"[bold cyan]Multiple Results for '{search_term}'[/]")
-        tree.add(f"[yellow]Found {len(results)} container(s)[/]")
+        run_system_commands([f"kitty --hold tmux new-session {container.run}"])
 
-        for result in results:
-            if len(result) == 3:
-                group_name, category_name, container = result
-                result_branch = tree.add(f"[green]{container.name}[/]")
-                result_branch.add(
-                    f"[dim]Group: {group_name} → Category: {category_name}[/]"
-                )
-            else:
-                group_name, container = result
-                result_branch = tree.add(f"[green]{container.name}[/]")
-                result_branch.add(f"[dim]Group: {group_name}[/]")
+    def _show_error(self, *messages):
+        error_tree = Tree("[bold red]✗ Error[/]")
+        for msg in messages:
+            error_tree.add(msg)
+        self._print_tree(error_tree)
 
-            result_branch.add(f"[white]{container.description}[/]")
-
-            commands_branch = result_branch.add("[bold cyan]Commands:[/]")
-            commands_branch.add(f"[blue]Pull:[/] {container.command}")
-            commands_branch.add(f"[yellow]Run:[/] {container.run}")
-
-    console.print()
-    console.print(tree)
-    console.print()
+    def _print_tree(self, tree):
+        self.console.print()
+        self.console.print(tree)
+        self.console.print()

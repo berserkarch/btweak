@@ -7,13 +7,7 @@ from btweak.helpers.toolhandler import (
     install_group,
 )  # noqa
 from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser
-from btweak.helpers.dockerhandler import (
-    print_all_container_groups,
-    print_container_group_by_index,
-    print_category_by_index,
-    print_search_results,
-    run_container,
-)
+from btweak.helpers.dockerhandler import ContainerDisplay
 
 
 def parse_args():
@@ -75,7 +69,6 @@ def parse_args():
         "-r", "--run", type=str, help="Run any available containers"
     )
 
-    # parser.add_argument("-v", "--version", action="store_true", help="Get Version Info") # noqa
     return parser, parser.parse_args()
 
 
@@ -109,21 +102,23 @@ def main():
                 resources.files("btweak.data").joinpath("docker.yaml")
             )
             dockerp.parse()
+            display = ContainerDisplay(dockerp)
+
             if args.group and args.category:
-                print_category_by_index(dockerp, args.group, args.category)
+                display.show_category(args.group, args.category)
             elif args.group:
-                print_container_group_by_index(dockerp, args.group)
+                display.show_group(args.group)
             elif args.category:
                 print(
                     "Error: The --category (-c) flag must be used with the --group (-g) flag."  # noqa
                 )
                 parser.parse_args(["docker", "--help"])
             elif args.list:
-                print_all_container_groups(dockerp)
+                display.show_all_groups()
             elif args.search:
-                print_search_results(dockerp, args.search)
+                display.search(args.search)
             elif args.run:
-                run_container(dockerp, args.run)
+                display.run(args.run)
             else:
                 parser.parse_args(["docker", "--help"])
         case _:
