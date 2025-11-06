@@ -30,13 +30,9 @@ def run_system_commands(
 
         process.wait()
 
-        # return {"returncode": process.returncode, "output": "".join(output)}
-
     if isinstance(commands, str):
-        # return execute_single_command(commands)
         execute_single_command(commands)
     elif isinstance(commands, list):
-        # return [execute_single_command(cmd) for cmd in commands]
         [execute_single_command(cmd) for cmd in commands]
     else:
         raise TypeError("commands must be a string or list of strings")
