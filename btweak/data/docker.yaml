@@ -23,21 +23,30 @@
 
 - name: "Penetration Testing"
   description: "Docker containers for penetration testing"
-  containers:
-    - name: "kali-linux"
-      description: "Official Kali Linux container with full toolset"
-      command: "docker pull kalilinux/kali-rolling"
-      run: "docker run -it --rm --network host kalilinux/kali-rolling /bin/bash"
+  categories:
+    - name: "Kali Linux"
+      description: "Kali Linux docker containers"
+      containers:
+        - name: "kali-cli"
+          description: "Official Kali Linux container with full toolset"
+          command: "docker pull kalilinux/kali-rolling"
+          run: "docker run -it --rm --network host kalilinux/kali-rolling /bin/bash"
 
-    - name: "metasploit"
-      description: "Metasploit Framework container"
-      command: "docker pull metasploitframework/metasploit-framework"
-      run: "docker run -it --rm -v ~/.msf4:/root/.msf4 metasploitframework/metasploit-framework"
-
-    - name: "parrot-security"
-      description: "Parrot Security OS container"
-      command: "docker pull parrotsec/security"
-      run: "docker run -it --rm --privileged parrotsec/security /bin/bash"
+        - name: "kali-gui"
+          description: "Lightweight Kali Linux container"
+          command: "docker pull lscr.io/linuxserver/kali-linux:latest"
+          run: "docker run -d --rm --name=kali-linux -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/kali-linux:/config --shm-size='1gb' lscr.io/linuxserver/kali-linux:latest"
+          runtime_comments:
+            - "- To stop the container run: docker stop kali-linux"
+            - "- Access via shell: docker exec -it kali-linux /bin/bash"
+            - "- More Info: https://github.com/linuxserver/docker-kali-linux"
+    - name: "Parrot OS"
+      description: "Parrot OS docker containers"
+      containers:
+        - name: "parrot-security"
+          description: "Parrot Security OS container"
+          command: "docker pull parrotsec/security"
+          run: "docker run -it --rm --privileged parrotsec/security /bin/bash"
 
 - name: "Tool Containers"
   description: "Standalone tools in docker containers"
@@ -73,10 +82,14 @@
           command: "docker pull instrumentisto/nmap"
           run: "docker run --rm instrumentisto/nmap -sV -p- target.com"
 
-        - name: "wireshark"
-          description: "Network protocol analyzer"
-          command: "docker pull linuxserver/wireshark"
-          run: "docker run -d --name=wireshark --net=host -e PUID=1000 -e PGID=1000 -p 3000:3000 linuxserver/wireshark"
+        - name: "Wireshark"
+          description: "Network protocol analyzer with GUI"
+          command: "docker pull lscr.io/linuxserver/wireshark:latest"
+          run: "docker run -d --rm --name=wireshark --net=host --cap-add=NET_ADMIN -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/wireshark:/config --shm-size='1gb' lscr.io/linuxserver/wireshark:latest"
+          runtime_comments:
+            - "- To stop the container run: docker stop wireshark"
+            - "- Access at: https://localhost:3001/"
+            - "- More Info: https://github.com/linuxserver/docker-wireshark"
 
         - name: "masscan"
           description: "Fast TCP port scanner"
@@ -118,6 +131,14 @@
           description: "Forensic analysis tools"
           command: "docker pull secsi/sleuthkit"
           run: "docker run --rm -v $(pwd):/evidence secsi/sleuthkit fls /evidence/disk.dd"
+
+    - name: "Others"
+      description: "Other security tools"
+      containers:
+        - name: "metasploit"
+          description: "Metasploit Framework container"
+          command: "docker pull metasploitframework/metasploit-framework"
+          run: "docker run -it --rm -v ~/.msf4:/root/.msf4 metasploitframework/metasploit-framework"
 
 - name: "GUI Applications"
   description: "Standalone applications in docker containers"
@@ -210,6 +231,7 @@
           runtime_comments:
             - "- To stop the container run: docker stop pyload-ng"
             - "- Access at: http://localhost:8000/"
+            - "- Default creds: pyload:pyload"
             - "- More Info: https://github.com/linuxserver/docker-pyload-ng"
 
         - name: "qBittorrent"
@@ -219,20 +241,12 @@
           runtime_comments:
             - "- To stop the container run: docker stop qbittorrent"
             - "- Access at: http://localhost:8080/"
+            - "- Username is: admin, for password run: docker logs -f qbittorrent"
             - "- More Info: https://github.com/linuxserver/docker-qbittorrent"
 
     - name: "Networking & Security"
       description: "Network monitoring and VPN tools"
       containers:
-        - name: "Wireshark"
-          description: "Network protocol analyzer with GUI"
-          command: "docker pull lscr.io/linuxserver/wireshark:latest"
-          run: "docker run -d --rm --name=wireshark --net=host --cap-add=NET_ADMIN -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/wireshark:/config --shm-size='1gb' lscr.io/linuxserver/wireshark:latest"
-          runtime_comments:
-            - "- To stop the container run: docker stop wireshark"
-            - "- Access at: https://localhost:3001/"
-            - "- More Info: https://github.com/linuxserver/docker-wireshark"
-
         - name: "WireGuard"
           description: "VPN container for secure networking"
           command: "docker pull lscr.io/linuxserver/wireguard:latest"
@@ -271,15 +285,6 @@
             - "- To stop the container run: docker stop vscodium"
             - "- Access at: https://localhost:3001/"
             - "- More Info: https://github.com/linuxserver/docker-vscodium"
-
-        - name: "Kali Linux"
-          description: "Lightweight Kali Linux container"
-          command: "docker pull lscr.io/linuxserver/kali-linux:latest"
-          run: "docker run -d --rm --name=kali-linux -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/kali-linux:/config --shm-size='1gb' lscr.io/linuxserver/kali-linux:latest"
-          runtime_comments:
-            - "- To stop the container run: docker stop kali-linux"
-            - "- Access via shell: docker exec -it kali-linux /bin/bash"
-            - "- More Info: https://github.com/linuxserver/docker-kali-linux"
 
         - name: "FreshRSS"
           description: "RSS aggregator for self-hosted feeds"
