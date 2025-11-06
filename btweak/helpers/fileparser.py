@@ -22,6 +22,7 @@ class Container:
     description: str
     command: str
     run: str
+    runtime_comments: Optional[List[str]] = None
 
 
 @dataclass
@@ -114,6 +115,9 @@ class ContainersGroupParser:
                             description=container_data["description"],
                             command=container_data["command"],
                             run=container_data["run"],
+                            runtime_comments=container_data.get(
+                                "runtime_comments"
+                            ),  # noqa
                         )
                         containers.append(container)
 
@@ -131,6 +135,7 @@ class ContainersGroupParser:
                         description=container_data["description"],
                         command=container_data["command"],
                         run=container_data["run"],
+                        runtime_comments=container_data.get("runtime_comments"),  # noqa
                     )
                     container_group.containers.append(container)
 

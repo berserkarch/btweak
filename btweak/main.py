@@ -67,8 +67,15 @@ def parse_args():
     docker_subcmd.add_argument(
         "-s", "--search", type=str, help="Search for available containers"
     )
+
     docker_subcmd.add_argument(
         "-r", "--run", type=str, help="Run any available containers"
+    )
+    docker_subcmd.add_argument(
+        "-t",
+        "--terminal",
+        action="store_true",
+        help="Run container in separate terminal. Must be used with --run (-r) flag.",  # noqa
     )
 
     return parser, parser.parse_args()
@@ -120,7 +127,15 @@ def main():
             elif args.search:
                 display.search(args.search)
             elif args.run:
-                display.run(args.run)
+                if args.terminal:
+                    display.run(args.run, True)
+                else:
+                    display.run(args.run)
+            elif args.terminal:
+                print(
+                    "Error: The --terminal (-t) flag must be used with the --run (-r) flag."  # noqa
+                )
+                parser.parse_args(["docker", "--help"])
             else:
                 parser.parse_args(["docker", "--help"])
         case _:

@@ -118,3 +118,19 @@
           description: "Forensic analysis tools"
           command: "docker pull secsi/sleuthkit"
           run: "docker run --rm -v $(pwd):/evidence secsi/sleuthkit fls /evidence/disk.dd"
+
+- name: "GUI Applications"
+  description: "Standalone applications in docker containers"
+  categories:
+    - name: "Browser"
+      description: "Disposable browsers in docker containers"
+      containers:
+        - name: "firefox"
+          description: "Firefox browser"
+          command: "docker pull lscr.io/linuxserver/firefox:latest"
+          run: "docker run --rm -d --name=firefox -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -e FIREFOX_CLI=https://berserkarch.xyz -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/firefox:/config --shm-size='1gb' lscr.io/linuxserver/firefox:latest"
+          runtime_comments:
+            [
+              "- To stop the container run: docker stop firefox",
+              "- Access the container at: https://localhost:3001/",
+            ]
