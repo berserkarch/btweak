@@ -20,3 +20,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 btweak = "btweak.main:main"
+
+[tool.poetry.packages]
+include = ["btweak"]

@@ -5,7 +5,7 @@ from btweak.helpers.toolhandler import (
     print_specific_group_by_index,
     install_group,
 )  # noqa
-from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser
+from btweak.helpers.fileparser import ToolGroupParser, ContainersGroupParser, FileParser
 from btweak.helpers.dockerhandler import (
     print_all_container_groups,
     print_container_group_by_index,
@@ -81,6 +81,7 @@ def parse_args():
 def main():
     FILENAME = "/usr/share/berserkarch/data/tools.yaml"
     DFILENAME = "/usr/share/berserkarch/data/docker.yaml"
+    FileParser("tools.yaml")
     # FILENAME = "/home/musashi/projects/btweak/btweak/data/tools.yaml"
     # DFILENAME = "/home/musashi/projects/btweak/btweak/data/docker.yaml"
     parser, args = parse_args()
