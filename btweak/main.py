@@ -82,6 +82,12 @@ def parse_args():
         action="store_true",
         help="Run container in separate terminal. Must be used with --run (-r) flag.",  # noqa
     )
+    docker_subcmd.add_argument(
+        "-C",
+        "--cleanup",
+        action="store_true",
+        help="Complete cleanup of things related to docker. BE CAREFUL - If you have any existing thing with docker, it all will be gone...",  # noqa
+    )
 
     return parser, parser.parse_args()
 
@@ -116,31 +122,33 @@ def main():
                 resources.files("btweak.data").joinpath("docker.yaml")
             )
             dockerp.parse()
-            display = ContainerDisplay(dockerp)
+            docker = ContainerDisplay(dockerp)
 
             if args.group and args.category:
-                display.show_category(args.group, args.category)
+                docker.show_category(args.group, args.category)
             elif args.group:
-                display.show_group(args.group)
+                docker.show_group(args.group)
             elif args.category:
                 print(
                     "Error: The --category (-c) flag must be used with the --group (-g) flag."  # noqa
                 )
                 parser.parse_args(["docker", "--help"])
             elif args.list:
-                display.show_all_groups()
+                docker.show_all_groups()
             elif args.search:
-                display.search(args.search)
+                docker.search(args.search)
             elif args.run:
                 if args.terminal:
-                    display.run(args.run, True)
+                    docker.run(args.run, True)
                 else:
-                    display.run(args.run)
+                    docker.run(args.run)
             elif args.terminal:
                 print(
                     "Error: The --terminal (-t) flag must be used with the --run (-r) flag."  # noqa
                 )
                 parser.parse_args(["docker", "--help"])
+            elif args.cleanup:
+                docker.cleanup()
             else:
                 parser.parse_args(["docker", "--help"])
         case _:

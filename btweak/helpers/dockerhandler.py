@@ -1,6 +1,6 @@
 from rich.console import Console
 from rich.tree import Tree
-from btweak.helpers.cmdhandler import run_system_commands
+from btweak.helpers.cmdhandler import run_system_commands, get_cmd_data
 from rich import print
 
 
@@ -134,6 +134,26 @@ class ContainerDisplay:
 
         self._print_tree(tree)
 
+    def cleanup(self):
+        print("([b yellow]*[/]) Starting complete docker obliteration...\n")
+        self._get_output_run_cmd(
+            [["docker", "ps", "-q"], "docker stop "],
+            "No Running containers found...",  # noqa
+        )
+        self._get_output_run_cmd(
+            [
+                [
+                    "docker",
+                    "images",
+                    "-q",
+                ],
+                "docker rmi -f ",
+            ],
+            "No Images were found...",
+        )
+        run_system_commands("docker system prune -f")
+        print("\n([b green]*[/]) Done...")
+
     def _get_group_or_error(self, index: int):
         group = self.parser.get_group_by_index(index)
         if group is None:
@@ -218,3 +238,10 @@ class ContainerDisplay:
         self.console.print()
         self.console.print(tree)
         self.console.print()
+
+    def _get_output_run_cmd(self, cmds: list[list | str], msg):
+        result = get_cmd_data(cmds[0])
+        if result:
+            run_system_commands(cmds[1] + " ".join(result))
+        else:
+            print(msg)

@@ -27,7 +27,9 @@ def print_specific_group_by_index(index: int, parser):
 
     packages_branch = tree.add(f"[yellow]{len(group.packages)} packages[/]")
     for i in group.packages:
-        packages_branch.add(f"[green]{i.name}[/]").add(f"[dim]{i.description}[/]")
+        packages_branch.add(f"[green]{i.name}[/]").add(
+            f"[dim]{i.description}[/]"
+        )  # noqa
 
     console.print(tree)
     print()

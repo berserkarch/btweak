@@ -36,3 +36,10 @@ def run_system_commands(
         [execute_single_command(cmd) for cmd in commands]
     else:
         raise TypeError("commands must be a string or list of strings")
+
+
+def get_cmd_data(cmds: List[str]) -> List:
+    result = subprocess.run(cmds, capture_output=True, text=True)
+    output = result.stdout.strip().splitlines()
+
+    return output
