@@ -152,6 +152,15 @@
             - "- Access the container at: https://localhost:3001/"
             - "- More Info at: https://github.com/linuxserver/docker-brave"
 
+        - name: "Ungooglechromium"
+          description: "Google chromium browser with google stripped away"
+          command: "docker pull lscr.io/linuxserver/ungoogled-chromium:latest"
+          run: "docker run -d --name=ungoogled-chromium -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -e CHROME_CLI=https://berserkarch.xyz/ -p 3000:3000 -p 3001:3001 -v ~/.config/btweak/ungoogled-chromium:/config --shm-size='1gb' --restart unless-stopped lscr.io/linuxserver/ungoogled-chromium:latest"
+          runtime_comments:
+            - "- To stop the container run: docker stop ungoogled-chromium"
+            - "- Access the container at: https://localhost:3001/"
+            - "- More Info at: https://github.com/linuxserver/docker-ungoogled-chromium"
+
         - name: "Chrome"
           description: "Chrome Browser"
           command: "docker pull lscr.io/linuxserver/chrome:latest"
