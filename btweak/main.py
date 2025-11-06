@@ -1,5 +1,6 @@
 import argparse
 from importlib import resources
+from btweak import __version__
 from btweak.helpers.fixthings import fix_berserkarch_gpg_pacman, fix_db_lck
 from btweak.helpers.toolhandler import (
     print_groups,
@@ -13,6 +14,10 @@ from btweak.helpers.dockerhandler import ContainerDisplay
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="btweak", description="Berserk Arch Tweak Tool"
+    )
+
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"%(prog)s {__version__}"
     )
 
     subcmd = parser.add_subparsers(dest="command", required=True)
