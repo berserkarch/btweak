@@ -26,3 +26,4 @@ btweak = "btweak.main:main"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0"
 black = "^23.0"
+flake8 = "^7.0"

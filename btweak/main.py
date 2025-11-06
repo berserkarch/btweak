@@ -29,7 +29,9 @@ def parse_args():
     )
 
     # tools group
-    tools_subcmd = subcmd.add_parser("tools", help="List, install and remove tools")
+    tools_subcmd = subcmd.add_parser(
+        "tools", help="List, install and remove tools"
+    )  # noqa
     tools_subcmd.add_argument(
         "-l",
         "--list",

@@ -16,15 +16,19 @@ class ContainerDisplay:
             group_branch.add(f"[dim italic]{group.description}[/]")
 
             if hasattr(group, "categories") and group.categories:
-                total_containers = sum(len(cat.containers) for cat in group.categories)
+                total_containers = sum(
+                    len(cat.containers) for cat in group.categories
+                )  # noqa
                 group_branch.add(
-                    f"[yellow]{len(group.categories)} categories, {total_containers} total containers[/]"
+                    f"[yellow]{len(group.categories)} categories, {total_containers} total containers[/]"  # noqa
                 )
 
-                categories_branch = group_branch.add("[bold magenta]Categories:[/]")
+                categories_branch = group_branch.add(
+                    "[bold magenta]Categories:[/]"
+                )  # noqa
                 for cat_idx, category in enumerate(group.categories, start=1):
                     cat_branch = categories_branch.add(
-                        f"[magenta]{cat_idx}. {category.name}[/] [dim]({len(category.containers)} containers)[/]"
+                        f"[magenta]{cat_idx}. {category.name}[/] [dim]({len(category.containers)} containers)[/]"  # noqa
                     )
                     cat_branch.add(f"[dim italic]{category.description}[/]")
 
@@ -59,7 +63,7 @@ class ContainerDisplay:
 
         if not (hasattr(group, "categories") and group.categories):
             self._show_error(
-                f"The selected group '{group.name}' does not contain any categories."
+                f"The selected group '{group.name}' does not contain any categories."  # noqa
             )
             return
 
@@ -68,10 +72,12 @@ class ContainerDisplay:
             return
 
         main_tree = Tree(
-            f"[bold magenta]Category: {category.name}[/] [dim]from Group:[/] [bold blue]{group.name}[/]"
+            f"[bold magenta]Category: {category.name}[/] [dim]from Group:[/] [bold blue]{group.name}[/]"  # noqa
         )
         main_tree.add(f"[dim italic]{category.description}[/]")
-        main_tree.add(f"[yellow]Listing {len(category.containers)} container(s)[/]")
+        main_tree.add(
+            f"[yellow]Listing {len(category.containers)} container(s)[/]"
+        )  # noqa
 
         for idx, container in enumerate(category.containers, start=1):
             self._add_container_details(main_tree, container, f"{idx}. ")
@@ -141,19 +147,21 @@ class ContainerDisplay:
             return group.categories[category_index - 1]
         except IndexError:
             self._show_error(
-                f"Category with index '{category_index}' not found in group '{group.name}'.",
-                f"Available indices for this group: 1 to {len(group.categories)}",
+                f"Category with index '{category_index}' not found in group '{group.name}'.",  # noqa
+                f"Available indices for this group: 1 to {len(group.categories)}",  # noqa
             )
             return None
 
     def _add_categorized_containers(self, tree, group):
         total_containers = sum(len(cat.containers) for cat in group.categories)
         tree.add(
-            f"[yellow]Total: {len(group.categories)} categories, {total_containers} containers[/]"
+            f"[yellow]Total: {len(group.categories)} categories, {total_containers} containers[/]"  # noqa
         )
 
         for cat_idx, category in enumerate(group.categories, start=1):
-            category_branch = tree.add(f"[bold magenta]{cat_idx}. {category.name}[/]")
+            category_branch = tree.add(
+                f"[bold magenta]{cat_idx}. {category.name}[/]"
+            )  # noqa
             category_branch.add(f"[dim italic]{category.description}[/]")
 
             for idx, container in enumerate(category.containers, start=1):
@@ -168,7 +176,9 @@ class ContainerDisplay:
             self._add_container_details(tree, container, f"{idx}. ")
 
     def _add_container_details(self, parent_branch, container, prefix=""):
-        container_branch = parent_branch.add(f"[bold green]{prefix}{container.name}[/]")
+        container_branch = parent_branch.add(
+            f"[bold green]{prefix}{container.name}[/]"
+        )  # noqa
         container_branch.add(f"[white]{container.description}[/]")
 
         commands_branch = container_branch.add("[bold cyan]Commands:[/]")
