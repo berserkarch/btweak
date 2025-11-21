@@ -113,7 +113,9 @@ class ContainerDisplay:
 
         self._print_tree(tree)
 
-    def run(self, search_term: str, terminal: bool = False):
+    def run(
+        self, search_term: str, terminal: bool = False, additional_flags=None
+    ):  # noqa
         results = self.parser.search_container(search_term)
 
         if not results:
@@ -124,7 +126,7 @@ class ContainerDisplay:
 
         if len(results) == 1:
             container = results[0][-1]
-            self._execute_container(container, terminal)
+            self._execute_container(container, terminal, additional_flags)
             return
 
         tree = Tree(f"[bold cyan]Multiple Results for '{search_term}'[/]")
@@ -221,21 +223,24 @@ class ContainerDisplay:
             group_name, _ = result
             return f"[dim]Group: {group_name}[/]"
 
-    def _execute_container(self, container, terminal):
-        print(container.run)
+    def _execute_container(self, container, terminal, additional_flags=None):
+        mod_cmd = container.run.replace("~", os.path.expanduser("~"))
+        if additional_flags:
+            mod_cmd = mod_cmd.replace(
+                "docker run", f"docker run {additional_flags}", 1
+            )  # noqa
+        print(mod_cmd)
         if container.runtime_comments:
             print("\n=== [b green]Runtime Information[/] ===")
             for i in container.runtime_comments:
                 print(i)
             print("=== [b red]Runtime Information[/] ===\n")
         if terminal:
-            run_system_commands(
-                [f"kitty --hold tmux new-session {container.run}"]
-            )  # noqa
+            run_system_commands([f"kitty --hold tmux new-session {mod_cmd}"])  # noqa
         else:
             # run_system_commands([f"{container.run}"], interactive=True)
-            expanded_cmd = container.run.replace("~", os.path.expanduser("~"))
-            part_cmd = shlex.split(expanded_cmd)
+            # mod_cmd = container.run.replace("~", os.path.expanduser("~"))
+            part_cmd = shlex.split(mod_cmd)
             os.execvp(part_cmd[0], part_cmd)
 
     def _show_error(self, *messages):

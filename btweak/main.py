@@ -83,6 +83,12 @@ def parse_args():
         help="Run container in separate terminal. Must be used with --run (-r) flag.",  # noqa
     )
     docker_subcmd.add_argument(
+        "-f",
+        "--flags",
+        type=str,
+        help="Additional flags to pass to docker run command. Must be used with --run (-r) flag.",  # noqa
+    )
+    docker_subcmd.add_argument(
         "-C",
         "--cleanup",
         action="store_true",
@@ -139,12 +145,17 @@ def main():
                 docker.search(args.search)
             elif args.run:
                 if args.terminal:
-                    docker.run(args.run, True)
+                    docker.run(args.run, True, args.flags)
                 else:
-                    docker.run(args.run)
+                    docker.run(args.run, False, args.flags)
             elif args.terminal:
                 print(
                     "Error: The --terminal (-t) flag must be used with the --run (-r) flag."  # noqa
+                )
+                parser.parse_args(["docker", "--help"])
+            elif args.flags:
+                print(
+                    "Error: The --flags (-f) flag must be used with the --run (-r) flag."  # noqa
                 )
                 parser.parse_args(["docker", "--help"])
             elif args.cleanup:
