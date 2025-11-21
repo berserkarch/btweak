@@ -9,27 +9,31 @@ def run_system_commands(
     shell: bool = True,
     text: bool = True,
     check: bool = False,
+    interactive: bool = False,
 ) -> Union[Dict, List[Dict]]:
 
     def execute_single_command(cmd: str) -> Dict:
-        cmd_args = cmd if shell else cmd.split()
+        if interactive:
+            subprocess.run(cmd, shell=shell)
+        else:
+            cmd_args = cmd if shell else cmd.split()
 
-        print("[b]>>> {}[/]".format(cmd))
-        process = subprocess.Popen(
-            cmd_args if isinstance(cmd_args, str) else cmd_args,
-            shell=shell,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=text,
-            bufsize=1,
-        )
+            print("[b]>>> {}[/]".format(cmd))
+            process = subprocess.Popen(
+                cmd_args if isinstance(cmd_args, str) else cmd_args,
+                shell=shell,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=text,
+                bufsize=1,
+            )
 
-        output = []
-        for line in process.stdout:
-            print(line, end="")
-            output.append(line)
+            output = []
+            for line in process.stdout:
+                print(line, end="")
+                output.append(line)
 
-        process.wait()
+            process.wait()
 
     if isinstance(commands, str):
         execute_single_command(commands)

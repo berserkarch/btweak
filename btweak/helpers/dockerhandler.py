@@ -6,6 +6,8 @@ from btweak.helpers.cmdhandler import (
     remove_dir,
 )  # noqa
 from rich import print
+import os
+import shlex
 
 
 class ContainerDisplay:
@@ -231,7 +233,10 @@ class ContainerDisplay:
                 [f"kitty --hold tmux new-session {container.run}"]
             )  # noqa
         else:
-            run_system_commands([f"{container.run}"])
+            # run_system_commands([f"{container.run}"], interactive=True)
+            expanded_cmd = container.run.replace("~", os.path.expanduser("~"))
+            part_cmd = shlex.split(expanded_cmd)
+            os.execvp(part_cmd[0], part_cmd)
 
     def _show_error(self, *messages):
         error_tree = Tree("[bold red]✗ Error[/]")
