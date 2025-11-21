@@ -12,8 +12,8 @@ def fix_berserkarch_gpg_pacman():
             "sudo pacman-key --init",
             "sudo pacman-key --populate",
             "curl -s https://thehackersbrain.xyz/pubkey.asc | gpg --import",
-            "gpg --export B024DCEFADEF4328B5E3A848E7E0F2B78484DACF | sudo pacman-key --add -",
-            "sudo pacman-key --lsign-key B024DCEFADEF4328B5E3A848E7E0F2B78484DACF",
+            "gpg --export B024DCEFADEF4328B5E3A848E7E0F2B78484DACF | sudo pacman-key --add -",  # noqa
+            "sudo pacman-key --lsign-key B024DCEFADEF4328B5E3A848E7E0F2B78484DACF",  # noqa
             "sudo pacman -Syy --noconfirm",
         ]
     )
