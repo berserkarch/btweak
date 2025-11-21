@@ -30,7 +30,7 @@
         - name: "kali-cli"
           description: "Official Kali Linux container with full toolset"
           command: "docker pull kalilinux/kali-rolling"
-          run: "docker run -it --rm --network host kalilinux/kali-rolling /bin/bash"
+          run: "docker run -it --rm --network host --name kali -v ~/barch/containers/kali/:/root/data kalilinux/kali-rolling /bin/bash"
 
         - name: "kali-gui"
           description: "Lightweight Kali Linux container"
