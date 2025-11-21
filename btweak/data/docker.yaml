@@ -31,6 +31,8 @@
           description: "Official Kali Linux container with full toolset"
           command: "docker pull kalilinux/kali-rolling"
           run: "docker run -it --rm --network host --name kali -v ~/barch/containers/kali/:/root/data kalilinux/kali-rolling /bin/bash"
+          runtime_comments:
+            - "- A local volume is mounted - Host: ~/barch/containers/kali -- Container: /root/data"
 
         - name: "kali-gui"
           description: "Lightweight Kali Linux container"
