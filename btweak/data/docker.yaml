@@ -16,10 +16,10 @@
       command: "docker pull berserkarch/berserkarch:base-devel"
       run: "docker run -it --rm --security-opt seccomp=unconfined --privileged --name berserkarch --hostname berserk berserkarch/berserkarch:base-devel"
 
-    - name: berserkarch-novnc
-      description: BerserkArch Latest Docker Image
-      command: "docker pull berserkarch/berserkarch:novnc"
-      run: "docker run -it --rm --security-opt seccomp=unconfined --hostname berserk --name berserkarch --privileged -p 5901:5901 -p 6080:6080 -p 2222:22 -p 8080:8080 berserkarch/berserkarch:novnc"
+    - name: berserkarch-deb
+      description: BerserkArch Docker Image - Debian Edition
+      command: "docker pull berserkarch/berserkarch:deb"
+      run: "docker run -it --rm --network host --name berserkdeb --hostname berserkarch-deb --security-opt seccomp=unconfined berserkarch/berserkarch:deb /bin/bash"
 
 - name: "Penetration Testing"
   description: "Docker containers for penetration testing"
