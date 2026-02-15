@@ -160,7 +160,8 @@ class ContainerDisplay:
             "No Images were found...",
         )
         run_system_commands("docker system prune -f")
-        remove_dir("~/.config/btweak/docker")
+        remove_dir("~/btweak/docker")
+        remove_dir("~/btweak/containers")
         print("\n([b green]*[/]) Done...")
 
     def _get_group_or_error(self, index: int):
